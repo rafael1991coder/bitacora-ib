@@ -28,6 +28,14 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run build
+      - name: Ajustar rutas para GitHub Pages
+        shell: bash
+        run: |
+          REPO_NAME="${GITHUB_REPOSITORY#*/}"
+          if [ -d "dist/client/$REPO_NAME/_next" ]; then
+            mv "dist/client/$REPO_NAME/_next" dist/client/_next
+            rmdir "dist/client/$REPO_NAME"
+          fi
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
