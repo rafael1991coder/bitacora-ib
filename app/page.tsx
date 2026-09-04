@@ -2,6 +2,7 @@
 /* oxlint-disable react/react-compiler, react-hooks/exhaustive-deps, jsx-a11y/label-has-associated-control, jsx-a11y/no-autofocus, jsx-a11y/no-static-element-interactions, jsx-a11y/prefer-tag-over-role */
 
 import { useEffect, useMemo, useRef, useState } from 'react';
+import Image from 'next/image';
 import {
   BookOpen,
   Check,
@@ -355,8 +356,8 @@ export default function Home() {
       <header className="sticky top-0 z-20 border-b border-[#d9e5e2] bg-[#f8fbfa]/90 backdrop-blur-xl">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-4 lg:px-8">
           <div className="flex items-center gap-3">
-            <div className="grid size-10 place-items-center rounded-xl bg-[#0e615d] text-white shadow-sm">
-              <BookOpen className="size-5" />
+            <div className="grid size-10 place-items-center overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-[#b9d9d3]">
+              <Image src="/ib-favicon.png" alt="Programa del IB" width={40} height={40} className="size-full object-cover" />
             </div>
             <div>
               <p className="font-serif text-xl font-bold leading-none tracking-tight">
