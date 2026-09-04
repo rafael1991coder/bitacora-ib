@@ -526,15 +526,17 @@ export default function Home() {
                     <p className="mt-2 line-clamp-1 text-sm text-[#6b817f]">
                       Compartido por {owner?.name ?? 'Usuario'}
                     </p>
-                    <div className="mt-4 md:hidden">
-                      <FeedbackPanel
-                        feedback={resource.feedback ?? []}
-                        currentUserId={currentUserId}
-                        onSave={(rating, comment) =>
-                          saveFeedback(resource.id, rating, comment)
-                        }
-                      />
-                    </div>
+                    {viewMode === 'lista' && (
+                      <div className="mt-4">
+                        <FeedbackPanel
+                          feedback={resource.feedback ?? []}
+                          currentUserId={currentUserId}
+                          onSave={(rating, comment) =>
+                            saveFeedback(resource.id, rating, comment)
+                          }
+                        />
+                      </div>
+                    )}
                   </div>
                   <div className="mt-auto pt-6 md:mt-0 md:pt-0">
                     <a
