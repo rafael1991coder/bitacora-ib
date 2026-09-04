@@ -8,6 +8,13 @@
       "when": 1788463569622,
       "tag": "0000_overjoyed_gauntlet",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1788544111484,
+      "tag": "0001_violet_shooting_star",
+      "breakpoints": true
     }
   ]
 }

@@ -1,6 +1,6 @@
 import { and, asc, desc, eq } from 'drizzle-orm';
 import { getDb } from '@/db';
-import { resources, studied, users } from '@/db/schema';
+import { feedback, resources, studied, users } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
 
@@ -20,16 +20,18 @@ async function authenticate(credentials: Credentials) {
 export async function GET() {
   try {
     const db = getDb();
-    const [userRows, resourceRows, studiedRows] = await Promise.all([
+    const [userRows, resourceRows, studiedRows, feedbackRows] = await Promise.all([
       db.select({ id: users.id, name: users.name, createdAt: users.createdAt }).from(users).orderBy(asc(users.name)),
       db.select().from(resources).orderBy(desc(resources.createdAt)),
       db.select().from(studied),
+      db.select({ resourceId: feedback.resourceId, userId: feedback.userId, rating: feedback.rating, comment: feedback.comment, createdAt: feedback.createdAt, updatedAt: feedback.updatedAt, userName: users.name }).from(feedback).innerJoin(users, eq(feedback.userId, users.id)),
     ]);
     return json({
       users: userRows,
       resources: resourceRows.map((resource) => ({
         ...resource,
         studiedBy: studiedRows.filter((row) => row.resourceId === resource.id).map((row) => row.userId),
+        feedback: feedbackRows.filter((row) => row.resourceId === resource.id),
       })),
     });
   } catch (error) {
@@ -82,6 +84,21 @@ export async function POST(request: Request) {
       if (existing.length) await db.delete(studied).where(and(eq(studied.resourceId, resourceId), eq(studied.userId, user.id)));
       else await db.insert(studied).values({ resourceId, userId: user.id, studiedAt: new Date().toISOString() });
       return json({ studied: !existing.length });
+    }
+
+    if (body.action === 'saveFeedback') {
+      const resourceId = body.resourceId ?? '';
+      const rating = Number(body.rating);
+      const comment = body.comment?.trim() ?? '';
+      if (!Number.isInteger(rating) || rating < 1 || rating > 5) return json({ error: 'Selecciona una calificación entre 1 y 5 estrellas.' }, 400);
+      if (comment.length > 600) return json({ error: 'El comentario puede tener hasta 600 caracteres.' }, 400);
+      const resourceExists = await db.select({ id: resources.id }).from(resources).where(eq(resources.id, resourceId)).limit(1);
+      if (!resourceExists.length) return json({ error: 'El recurso ya no existe.' }, 404);
+      const existing = await db.select({ resourceId: feedback.resourceId }).from(feedback).where(and(eq(feedback.resourceId, resourceId), eq(feedback.userId, user.id))).limit(1);
+      const now = new Date().toISOString();
+      if (existing.length) await db.update(feedback).set({ rating, comment, updatedAt: now }).where(and(eq(feedback.resourceId, resourceId), eq(feedback.userId, user.id)));
+      else await db.insert(feedback).values({ resourceId, userId: user.id, rating, comment, createdAt: now, updatedAt: now });
+      return json({ ok: true });
     }
 
     if (body.action === 'deleteResource') {
